@@ -12,10 +12,9 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List, Literal
 
-# Example schemas (replace with your own):
-
+# Example schemas (you can keep these or remove later):
 class User(BaseModel):
     """
     Users collection schema
@@ -38,11 +37,21 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# ---- Gamma-style MVP Schemas ----
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Project(BaseModel):
+    """Projects represent a doc or deck. Collection: project"""
+    title: str = Field(..., min_length=1)
+    kind: Literal["presentation", "doc"] = Field("presentation")
+    theme: Literal["light", "dark", "gradient"] = Field("light")
+    slug: Optional[str] = Field(None, description="Public slug for sharing")
+    published: bool = Field(False)
+
+class Block(BaseModel):
+    """Content blocks for a project. Collection: block"""
+    project_id: str = Field(..., description="Parent project id (stringified ObjectId)")
+    type: Literal["heading", "text", "image"] = Field(...)
+    content: str = Field("", description="Markdown/text or image URL")
+    order: int = Field(0, description="Ordering index")
+
+# The Flames database viewer can read these via /schema endpoint
